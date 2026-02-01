@@ -1,14 +1,16 @@
-# CLAUDE.md - AI Assistant Guide for Athlete
+# CLAUDE.md - AI Assistant Guide for Athlete Portal
 
-This document provides guidance for AI assistants working with the Athlete codebase.
+This document provides guidance for AI assistants working with the Athlete Portal codebase.
 
 ## Repository Overview
 
-**Project:** Athlete
-**Status:** New Repository (Initial Setup)
+**Project:** Athlete Portal
+**Founder:** Donald Meador
+**Status:** MVP Development
+**Platform:** iOS-first (React Native/Expo)
 **Last Updated:** 2026-02-01
 
-This repository is currently in its initial setup phase. Documentation will be expanded as the codebase evolves.
+Athlete Portal is a digital platform that connects youth baseball players (8U-14U) with travel teams. Parents can showcase their child's stats and availability, while coaches can find qualified players using filters and auto-matching.
 
 ---
 
@@ -16,15 +18,122 @@ This repository is currently in its initial setup phase. Documentation will be e
 
 ```
 Athlete/
-├── CLAUDE.md          # AI assistant guidance (this file)
-└── (additional directories and files to be added)
+├── CLAUDE.md                    # AI assistant guidance (this file)
+├── App.tsx                      # Main app entry point
+├── app.json                     # Expo configuration
+├── package.json                 # Dependencies and scripts
+├── tsconfig.json                # TypeScript configuration
+├── babel.config.js              # Babel configuration
+├── .env.example                 # Environment variables template
+├── .gitignore                   # Git ignore rules
+├── assets/                      # Static assets (icons, splash)
+└── src/
+    ├── components/
+    │   └── common/
+    │       ├── Button.tsx       # Reusable button component
+    │       └── Input.tsx        # Reusable input component
+    ├── config/
+    │   ├── constants.ts         # App constants, colors, positions
+    │   └── firebase.ts          # Firebase initialization
+    ├── contexts/
+    │   └── AuthContext.tsx      # Authentication context provider
+    ├── navigation/
+    │   ├── RootNavigator.tsx    # Root navigation (auth flow)
+    │   ├── ParentTabNavigator.tsx   # Parent user tabs
+    │   └── CoachTabNavigator.tsx    # Coach user tabs
+    ├── screens/
+    │   ├── auth/
+    │   │   ├── LoginScreen.tsx
+    │   │   ├── SignUpScreen.tsx
+    │   │   └── RoleSelectionScreen.tsx
+    │   ├── parent/
+    │   │   ├── PlayerDashboardScreen.tsx
+    │   │   ├── PlayerProfileScreen.tsx
+    │   │   ├── EditPlayerScreen.tsx
+    │   │   ├── AvailabilityScreen.tsx
+    │   │   ├── VideosScreen.tsx
+    │   │   └── MatchesScreen.tsx
+    │   ├── coach/
+    │   │   ├── TeamDashboardScreen.tsx
+    │   │   ├── TeamProfileScreen.tsx
+    │   │   ├── EditTeamScreen.tsx
+    │   │   ├── PlayerNeedsScreen.tsx
+    │   │   └── PlayerSearchScreen.tsx
+    │   └── shared/
+    │       ├── PlayerDetailScreen.tsx
+    │       ├── TeamDetailScreen.tsx
+    │       ├── MessagesScreen.tsx
+    │       ├── ConversationScreen.tsx
+    │       └── SettingsScreen.tsx
+    ├── services/
+    │   ├── playerService.ts     # Player CRUD operations
+    │   ├── teamService.ts       # Team CRUD operations
+    │   ├── matchingService.ts   # Player-team matching engine
+    │   └── messagingService.ts  # Real-time messaging
+    └── types/
+        └── index.ts             # TypeScript type definitions
 ```
 
-As the project develops, update this section with the actual directory structure.
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | React Native (Expo) |
+| Language | TypeScript |
+| Backend | Firebase |
+| Database | Cloud Firestore |
+| Auth | Firebase Authentication |
+| Storage | Firebase Storage |
+| Navigation | React Navigation v6 |
+| State | React Context + Zustand |
+| Styling | StyleSheet (React Native) |
 
 ---
 
 ## Development Workflow
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Expo CLI (`npm install -g expo-cli`)
+- iOS Simulator (Xcode) or Android Emulator
+- Firebase project (see Environment Setup)
+
+### Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+
+# Run on iOS
+npm run ios
+
+# Run on Android
+npm run android
+```
+
+### Environment Setup
+
+1. Copy `.env.example` to `.env`
+2. Create a Firebase project at https://console.firebase.google.com
+3. Enable Authentication (Email/Password)
+4. Create a Firestore database
+5. Add Firebase config values to `.env`
+
+```bash
+EXPO_PUBLIC_FIREBASE_API_KEY=your-api-key
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+EXPO_PUBLIC_FIREBASE_APP_ID=your-app-id
+```
 
 ### Branch Naming Conventions
 
@@ -35,84 +144,44 @@ As the project develops, update this section with the actual directory structure
 
 ### Commit Message Guidelines
 
-Use clear, descriptive commit messages following this format:
-
 ```
 <type>: <short description>
 
 [optional body with more details]
 ```
 
-Types:
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
-
-### Pull Request Process
-
-1. Create a feature branch from the main branch
-2. Make changes and commit with clear messages
-3. Push to remote and create a pull request
-4. Request code review if applicable
-5. Merge after approval
+Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
 
 ---
 
-## Code Conventions
+## Key Concepts
 
-### General Guidelines
+### User Roles
 
-- Write clean, readable, and maintainable code
-- Follow the principle of least surprise
-- Keep functions focused and single-purpose
-- Add comments for complex logic, not obvious code
-- Avoid premature optimization
+1. **Parent** - Creates player profiles, manages availability, connects with teams
+2. **Coach** - Creates team profiles, searches for players, manages player needs
 
-### File Organization
+### Core Data Models
 
-- Group related files together
-- Use meaningful file and directory names
-- Keep configuration files at the root level
-- Separate source code from tests and documentation
+| Model | Description |
+|-------|-------------|
+| `User` | Base user with role (parent/coach) |
+| `Player` | Child profile with stats, positions, availability |
+| `Team` | Travel team with needs, tournaments, contact info |
+| `Match` | Auto-generated player-team compatibility match |
+| `Conversation` | Message thread between parent and coach |
+| `Message` | Individual chat message |
 
----
+### Matching Algorithm
 
-## Testing
+The rule-based matching engine (`src/services/matchingService.ts`) calculates compatibility scores:
 
-### Running Tests
+- **Position match (40 pts)**: Primary position = 40, Secondary = 25
+- **Age group match (30 pts)**: Same age group required
+- **Location match (20 pts)**: Same state = 20, Same city bonus = 5
+- **Availability match (10-15 pts)**: Matching type and date overlap
 
-```bash
-# Add test commands here as the project develops
-```
-
-### Test Conventions
-
-- Write unit tests for new functionality
-- Ensure tests are deterministic and independent
-- Name tests descriptively to explain what they verify
-
----
-
-## Build and Deployment
-
-### Local Development
-
-```bash
-# Add local development setup commands here
-```
-
-### Building the Project
-
-```bash
-# Add build commands here
-```
-
-### Deployment
-
-Document deployment procedures as they are established.
+Minimum score threshold: 50 points
 
 ---
 
@@ -120,8 +189,11 @@ Document deployment procedures as they are established.
 
 | File | Purpose |
 |------|---------|
-| `CLAUDE.md` | AI assistant guidance document |
-| (Add more as project develops) | |
+| `src/types/index.ts` | All TypeScript interfaces and types |
+| `src/config/constants.ts` | Colors, positions, age groups, states |
+| `src/services/matchingService.ts` | Player-team matching algorithm |
+| `src/contexts/AuthContext.tsx` | Authentication state management |
+| `src/navigation/RootNavigator.tsx` | Main navigation routing |
 
 ---
 
@@ -130,68 +202,129 @@ Document deployment procedures as they are established.
 ### When Starting Work
 
 1. Read this CLAUDE.md file first
-2. Explore the codebase structure
-3. Check for existing patterns and conventions
-4. Review recent commits for context
+2. Check `src/types/index.ts` for data models
+3. Review `src/config/constants.ts` for app constants
+4. Understand the role-based navigation flow
 
-### When Making Changes
+### When Adding Features
 
-1. Understand the existing code before modifying
-2. Follow established patterns and conventions
-3. Keep changes focused and minimal
-4. Test changes before committing
-5. Write clear commit messages
+1. Check existing services in `src/services/`
+2. Follow the screen naming pattern: `<Entity><Action>Screen.tsx`
+3. Add types to `src/types/index.ts`
+4. Update navigation if adding new screens
 
-### When Adding New Features
+### When Fixing Bugs
 
-1. Check for similar existing implementations
-2. Follow the established architecture
-3. Add appropriate tests
-4. Update documentation if needed
+1. Check Firebase console for auth/database issues
+2. Verify service methods handle errors properly
+3. Test both parent and coach flows
 
 ---
 
-## Important Notes
+## Firebase Collections
 
-- **Security:** Never commit sensitive data (API keys, passwords, credentials)
-- **Dependencies:** Document any new dependencies added
-- **Breaking Changes:** Clearly communicate any breaking changes
-
----
-
-## Environment Setup
-
-### Prerequisites
-
-Document prerequisites as they are determined:
-- Programming language and version
-- Package manager
-- Required tools and utilities
-
-### Environment Variables
-
-```bash
-# Document required environment variables here
 ```
+/users/{userId}
+  - email, role, displayName, phoneNumber, createdAt, updatedAt
+
+/players/{playerId}
+  - parentId, firstName, lastName, dateOfBirth, ageGroup
+  - location, primaryPosition, secondaryPositions
+  - currentTeam, pastTeams, stats, highlightVideos
+  - availability[], isActive, createdAt, updatedAt
+
+/teams/{teamId}
+  - coachId, name, ageGroup, location, description
+  - tournaments[], playerNeeds[], contactEmail
+  - contactPhone, website, isActive, createdAt, updatedAt
+
+/matches/{matchId}
+  - playerId, teamId, score, matchedOn{}, status, createdAt
+
+/conversations/{conversationId}
+  - parentId, coachId, playerId, teamId
+  - lastMessage, unreadCount{}, createdAt, updatedAt
+
+/messages/{messageId}
+  - conversationId, senderId, senderRole, content
+  - read, createdAt
+```
+
+---
+
+## Design System
+
+### Colors
+
+```typescript
+COLORS = {
+  primary: '#1E3A5F',    // Deep navy blue
+  secondary: '#E63946',   // Baseball red
+  background: '#F8F9FA',
+  surface: '#FFFFFF',
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+}
+```
+
+### Component Patterns
+
+- Use `Button` component for all actions
+- Use `Input` component for form fields
+- Screens end with `Screen.tsx`
+- Services export async functions
+
+---
+
+## Future Enhancements (Post-MVP)
+
+- [ ] Video upload to Firebase Storage
+- [ ] Push notifications via Expo
+- [ ] Premium subscription tiers
+- [ ] Reviews/ratings system
+- [ ] GameChanger stat syncing
+- [ ] ML-enhanced matching
+- [ ] Tryout event postings
 
 ---
 
 ## Troubleshooting
 
-Document common issues and solutions as they arise.
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| Firebase auth fails | Check .env file has correct credentials |
+| Navigation error | Ensure screen is registered in navigator |
+| TypeScript error | Check types in `src/types/index.ts` |
+| Picker not working | Install `@react-native-picker/picker` |
+
+### Debug Commands
+
+```bash
+# Clear Metro cache
+expo start -c
+
+# Check Expo logs
+expo diagnostics
+```
 
 ---
 
-## Contributing
+## Security Notes
 
-As this project develops, contribution guidelines will be added here.
+- Never commit `.env` file
+- Use environment variables for all secrets
+- Validate user input before Firestore writes
+- Implement Firestore security rules for production
 
 ---
 
 ## Changelog
 
-- **2026-02-01:** Initial CLAUDE.md created for new repository setup
+- **2026-02-01:** Initial MVP development - complete app structure with authentication, player/team profiles, matching engine, and messaging
 
 ---
 
-*This document should be updated as the project evolves. Keep it current to help AI assistants work effectively with the codebase.*
+*Keep this document updated as the project evolves.*
